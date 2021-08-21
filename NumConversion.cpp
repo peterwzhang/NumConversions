@@ -90,11 +90,12 @@ void printProblem(const T number, const NumberSystem convertFrom, const NumberSy
 
 int getAns(const NumberSystem convertTo){
     std::cout << "Please enter an ";
-    // ? this probably is not needed, but will test
+    // ? this might not be needed, but will test
     switch (convertTo){
         case NumberSystem::binary:
-            std::cout << "binary number (put a 0b in the front): ";
+            std::cout << "binary number: ";
             std::cin >> std::dec;
+            break;
         case NumberSystem::octal:
             std::cout << "octal number (put a 0 in the front): ";
             std::cin >> std::oct;
@@ -110,6 +111,14 @@ int getAns(const NumberSystem convertTo){
         default:
             return -1;
     }
+    if (convertTo == NumberSystem::binary){
+        std::bitset<8> ans{};
+        std::cin >> ans;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return static_cast<int>(ans.to_ulong());
+    }
+    // convert to non binary
     int ans{};
     std::cin >> ans;
     std::cin.clear();
@@ -117,13 +126,17 @@ int getAns(const NumberSystem convertTo){
     return ans;
 }
 
+//TODO: fix this
 template <size_t S>
 bool testProblem(const std::bitset<S> problemNumber, const NumberSystem convertTo){
-    
+    int userAns{ getAns(convertTo) };
+    int ans = static_cast<int>(problemNumber.to_ulong()); // okay conversion (0-255 range)
+    return userAns == ans;
 }
 
 bool testProblem(const int problemNumber, const NumberSystem convertTo){
-
+    int userAns{ getAns(convertTo) };
+    return userAns == problemNumber;
 }
 
 bool generateProblem(int randNum){
@@ -131,50 +144,61 @@ bool generateProblem(int randNum){
     switch(static_cast<ProblemTypes>(randNum)){
         case ProblemTypes::binaryToOctal:
             printProblem(std::bitset<8>(problemNumber), NumberSystem::binary, NumberSystem::octal);
-            break;
+            return testProblem(std::bitset<8>(problemNumber), NumberSystem::octal);
         case ProblemTypes::binaryToDecimal:
             printProblem(std::bitset<8>(problemNumber), NumberSystem::binary, NumberSystem::decimal);
-            break;
+            return testProblem(std::bitset<8>(problemNumber), NumberSystem::decimal);
         case ProblemTypes::binaryToHexadecimal:
             printProblem(std::bitset<8>(problemNumber), NumberSystem::binary, NumberSystem::hexadecimal);
-            break;
+            return testProblem(std::bitset<8>(problemNumber), NumberSystem::hexadecimal);
         case ProblemTypes::octalToBinary:
             printProblem(problemNumber, NumberSystem::octal, NumberSystem::binary);
-            break;
+            return testProblem(problemNumber, NumberSystem::binary);
         case ProblemTypes::octalToDecimal:
             printProblem(problemNumber, NumberSystem::octal, NumberSystem::decimal);
-            break;
+            return testProblem(problemNumber, NumberSystem::decimal);
         case ProblemTypes::octalToHexadecimal:
             printProblem(problemNumber, NumberSystem::octal, NumberSystem::hexadecimal);
-            break;
+            return testProblem(problemNumber, NumberSystem::hexadecimal);
         case ProblemTypes::decimalToBinary:
             printProblem(problemNumber, NumberSystem::decimal, NumberSystem::binary);
-                break;
+            return testProblem(problemNumber, NumberSystem::binary);
         case ProblemTypes::decimalToOctal:
             printProblem(problemNumber, NumberSystem::decimal, NumberSystem::octal);
-            break;
+            return testProblem(problemNumber, NumberSystem::octal);
         case ProblemTypes::decimalToHexadecimal:
             printProblem(problemNumber, NumberSystem::decimal, NumberSystem::hexadecimal);
-            break;
+            return testProblem(problemNumber, NumberSystem::hexadecimal);
         case ProblemTypes::hexadecimalToBinary:
             printProblem(problemNumber, NumberSystem::hexadecimal, NumberSystem::binary);
-            break;
+            return testProblem(problemNumber, NumberSystem::binary);
         case ProblemTypes::hexadecimalToOctal:
             printProblem(problemNumber, NumberSystem::hexadecimal, NumberSystem::octal);
-            break;
+            return testProblem(problemNumber, NumberSystem::octal);
         case ProblemTypes::hexadecimalToDecimal:
             printProblem(problemNumber, NumberSystem::hexadecimal, NumberSystem::decimal);
-            break;
+            return testProblem(problemNumber, NumberSystem::decimal);
         default: // should never reach here
             return false;
     }
 }
 
-int main(){
-    const int numbersToConvert{ getInt("How many numbers would you like to practice? ") };
+void askProblems(const int numbersToConvert){
+    int correct{ 0 };
     for (auto i{0}; i < numbersToConvert; ++i){
         std::cout << std::dec << i + 1 << ": ";
-        generateProblem(generateRandomInt(0, static_cast<int>(ProblemTypes::maxIndex) - 1));
+        if (generateProblem(generateRandomInt(0, static_cast<int>(ProblemTypes::maxIndex) - 1))){
+            ++correct;
+        }
     }
+    std::cout << std::dec;
+    std::cout << "You got " << correct << " correct out of " << numbersToConvert << '\n';
+}
+
+
+int main(){
+    const int numbersToConvert{ getInt("How many numbers would you like to practice? ") };
+    askProblems(numbersToConvert);
+    return 0;
 }
 
