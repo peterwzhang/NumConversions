@@ -67,10 +67,9 @@ int generateRandomInt(const int min, const int max){
     std::uniform_int_distribution rand(min, max);
     return rand(mt);
 }
-template <typename T>
-void printProblem(const T number, const NumberSystem convertFrom, const NumberSystem convertTo){
-    std::cout << "Convert ";
-    switch (convertFrom){
+
+void applyPrintFormat(const NumberSystem ns){
+    switch (ns){
         case NumberSystem::octal:
             std::cout << '0' << std::oct;
             break;
@@ -81,16 +80,21 @@ void printProblem(const T number, const NumberSystem convertFrom, const NumberSy
             std::cout << "0x" << std::hex;
             break;
         case NumberSystem::binary:
-            std::cout << "0b";
+            std::cout << "0b" << std::dec;
         default:
             break;
     }
-    std::cout << number << " to " << nsToString(convertTo) << ": \n";
+}
+
+template <typename T>
+void printProblem(const T number, const NumberSystem convertFrom, const NumberSystem convertTo){
+    std::cout << "Convert ";
+    applyPrintFormat(convertFrom);
+    std::cout << number << " to " << nsToString(convertTo) << '\n';
 }
 
 int getAns(const NumberSystem convertTo){
     std::cout << "Please enter an ";
-    // ? this might not be needed, but will test
     switch (convertTo){
         case NumberSystem::binary:
             std::cout << "binary number: ";
@@ -131,12 +135,35 @@ template <size_t S>
 bool testProblem(const std::bitset<S> problemNumber, const NumberSystem convertTo){
     int userAns{ getAns(convertTo) };
     int ans = static_cast<int>(problemNumber.to_ulong()); // okay conversion (0-255 range)
-    return userAns == ans;
+    if (userAns == ans){
+        std::cout << "Correct!\n";
+        return true;
+    }
+    else{
+        std::cout << "Incorrect, the answer is: ";
+        applyPrintFormat(convertTo);
+        std::cout << ans << '\n';
+        return false;
+    }
 }
 
 bool testProblem(const int problemNumber, const NumberSystem convertTo){
     int userAns{ getAns(convertTo) };
-    return userAns == problemNumber;
+    if (userAns == problemNumber){
+        std::cout << "Correct!\n";
+        return true;
+    }
+    else{
+        std::cout << "Incorrect, the answer is: ";
+        applyPrintFormat(convertTo);
+        if (convertTo == NumberSystem::binary){
+            std::cout << std::bitset<8>(problemNumber) << '\n';
+        }
+        else {
+            std::cout << problemNumber << '\n';
+        }
+        return false;
+    }
 }
 
 bool generateProblem(int randNum){
